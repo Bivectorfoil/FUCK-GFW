@@ -154,3 +154,45 @@ $ sudo apt install net-tools -y
 
 - <https://maven.apache.org/guides/mini/guide-proxies.html>
 - <https://stackoverflow.com/questions/1251192/how-do-i-use-maven-through-a-proxy>
+
+## Docker
+
+参考：https://www.lfhacks.com/tech/pull-docker-images-behind-proxy/
+
+具体操作
+下面是来自 官方文档 的操作步骤和详细解释：
+
+创建 dockerd 相关的 systemd 目录，这个目录下的配置将覆盖 dockerd 的默认配置
+```sh
+$ sudo mkdir -p /etc/systemd/system/docker.service.d
+```
+新建配置文件 /etc/systemd/system/docker.service.d/http-proxy.conf，这个文件中将包含环境变量
+
+```sh
+[Service]
+Environment="HTTP_PROXY=http://proxy.example.com:80"
+Environment="HTTPS_PROXY=https://proxy.example.com:443"
+```
+如果你自己建了私有的镜像仓库，需要 dockerd 绕过代理服务器直连，那么配置 NO_PROXY 变量：
+
+```sh
+[Service]
+Environment="HTTP_PROXY=http://proxy.example.com:80"
+Environment="HTTPS_PROXY=https://proxy.example.com:443"
+Environment="NO_PROXY=your-registry.com,10.10.10.10,*.example.com"
+```
+多个 NO_PROXY 变量的值用逗号分隔，而且可以使用通配符（*），极端情况下，如果 NO_PROXY=*，那么所有请求都将不通过代理服务器。
+
+重新加载配置文件，重启 dockerd
+
+```sh
+$ sudo systemctl daemon-reload
+$ sudo systemctl restart docker
+```
+检查确认环境变量已经正确配置：
+
+```sh
+$ sudo systemctl show --property=Environment docker
+```
+
+从 docker info 的结果中查看配置项。
