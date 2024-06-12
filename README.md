@@ -102,6 +102,54 @@ ALL_PROXY=socks5://localhost:1080 brew ...
 </settings>
 ```
 
+## APT
+
+使用代理文件
+最简单方法是创建一个 proxy.conf 代理文件
+
+```sh
+$ sudo vi /etc/apt/apt.conf.d/proxy.conf
+```
+对于无用户名和密码的代理服务器，设置如下
+
+（1）对于 HTTP Proxy, 添加如下条目
+
+```sh
+Acquire::http::Proxy "http://proxy-IP-address:proxyport/";
+```
+（2）对于 HTTPS Proxy，添加如下条目
+
+```sh
+Acquire::https::Proxy "http://proxy-IP-address:proxyport/";
+```
+示例如下
+
+```sh
+$ cat  /etc/apt/apt.conf.d/proxy.conf
+Acquire::http::Proxy "http://192.168.56.102:3128/";
+Acquire::https::Proxy "http://192.168.56.102:3128/";
+```
+如果您的代理服务器需要用户名和密码，请按如下方式添加
+
+```
+Acquire::http::Proxy "http://username:password@proxy-IP-address:proxyport";
+Acquire::https::Proxy "http://username:password@proxy-IP-address:proxyport";
+```
+示例如下
+
+```sh
+$ cat  /etc/apt/apt.conf.d/proxy.conf
+Acquire::http::Proxy "http://init@PassW0rd321#@192.168.56.102:3128/";
+Acquire::https::Proxy "http://init@PassW0rd321#@192.168.56.102:3128/";
+```
+完成后保存更改，代理设置将在下次运行 APT 包管理器时生效。
+
+例如，您可以更新本地包索引，然后安装 net-tools 包
+
+```sh
+$ sudo apt update
+$ sudo apt install net-tools -y
+```
 ### 参考
 
 - <https://maven.apache.org/guides/mini/guide-proxies.html>
